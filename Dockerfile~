@@ -1,0 +1,10 @@
+FROM radioastro/meqtrees
+
+ADD src/ src/
+
+RUN mkdir /input /output 
+
+RUN pyxis scatterbrane_test[parameters.json]
+
+
+

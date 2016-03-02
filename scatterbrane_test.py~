@@ -1,0 +1,43 @@
+from __future__ import division
+from brane import Brane
+from Pyxis.ModSupport import *
+import numpy as np
+from fits_work import EasyFits
+import pyfits
+import pyrap.tables as pt
+
+"""Repacking of 'Scatterbrane', see:http://krosenfeld.github.io/scatterbrane/current/user/brane.html"""
+
+deg2muas = 3600e6
+pc2m = 3.086e16
+
+
+def run_scatterbrane(fits, wavelength, ism_dict, **kwargs):
+
+    model0 = Model(fits_list[0], ism_dict)
+
+    n_screen, fits_list = model0.match_src_screen(fits_list)
+
+    brane = Brane(model0.fits[0].data[0, 0, :, :], model0.pixelsize * deg2muas,
+                  nphi=model0.nphi, wavelength=wavelength, **kwargs)
+    brane.generatePhases()
+    ism_fits_list=[]
+    for it in range(n_screen):
+        model = EasyFits(fits_list[it])
+        brane.setModel(model.data[0, 0, :, :], model.pixelsize * deg2muas)
+        brane.scatter(move_pix=it*model0.extra_angle/float(n_screen))
+
+        header = pyfits.getheader(model.fits.filename())
+        header['NAXIS1'] = brane.nx
+        header['NAXIS2'] = brane.nx
+        header['CDELT1'] = -1*brane.dx/float(deg2muas)
+        header['CDELT2'] = 1*brane.dx/float(deg2muas)
+
+        name = model.fits.filename().replace('.fits', '%sism.fits'%it)
+        ism_fits_list.append(name)
+
+        pyfits.writeto(name, brane.iss.reshape(1, 1, brane.nx, brane.nx),
+                       header, clobber=True)
+
+    print "ISM Scattered"
+    return ism_fits_list
