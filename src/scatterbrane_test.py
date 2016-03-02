@@ -23,7 +23,7 @@ def run_scatterbrane(config):
     ism_dict = setup_keyword_dictionary('ism_', parameters)
     v.MS = parameters['fitsfolder']+'.MS'
     v.OUTDIR = parameters['fitsfolder']
-
+    x.sh('mkdir '+OUTDIR)
     fits_list = np.sort(glob.glob('input/%s/*.fits' % parameters['fitsfolder'])).tolist()
     model0 = EasyFits(fits_list[0])
 
@@ -38,8 +38,10 @@ def run_scatterbrane(config):
     header['CDELT1'] = -1*brane.dx/float(deg2muas)
     header['CDELT2'] = 1*brane.dx/float(deg2muas)
 
-    pyfits.writeto("$OUTDIR/scattered.fits", brane.iss.reshape(1, 1, brane.nx, brane.nx),
+    pyfits.writeto(OUTDIR+"/scattered.fits", brane.iss.reshape(1, 1, brane.nx, brane.nx),
                    header, clobber=True)
+
+    x.sh('mv %s output/'%OUTDIR)
 
     print "ISM Scattered"
 
