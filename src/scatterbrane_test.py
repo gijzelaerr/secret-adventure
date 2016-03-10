@@ -1,3 +1,5 @@
+
+
 from Pyxis.ModSupport import *
 import numpy as np
 from fits_work import EasyFits
@@ -8,7 +10,7 @@ import kliko
 
 def run_test(config):
     schema_string = open('../kliko.yml', 'r').read()
-    parameters = open(config, 'r').read()
+    parameters = json.loads(open(config, 'r').read())
     schema = kliko.validate_kliko(schema_string)
 
     kliko.validate_parameters(parameters, schema)
@@ -26,3 +28,4 @@ def run_test(config):
 
 
 run_test('input/parameters.json')
+
